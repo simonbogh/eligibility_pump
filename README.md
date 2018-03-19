@@ -1,7 +1,9 @@
 # AI pump
 
 The objective is that the ai from python select the actions in order to meet a reference temperature set in the python code.
-The actions are up in temperature, down in temperature and the third is do nothing.
+The actions are up in temperature, down in temperature and the third is do nothing. The temperature set by python cannot 
+go higher than 40 or lower than 15. The model have no dynamics from a house and is therefore only a test simulation to
+see if you algorithm can hit a sudden reference temperature which in this case is 27.
 
 # The following libraries are needed to run
 * tensorflow or keras
