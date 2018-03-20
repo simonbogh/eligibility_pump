@@ -14,4 +14,4 @@ class ScoreHistory:
         plt.ylabel('Average reward score per epochs')
         plt.xlabel('Training epochs')
         plt.title('Training curves tracking the agent average score')
-        plt.savefig('Brain_plot.png')
+        plt.savefig('saves/Brain_plot.png')
