@@ -28,7 +28,7 @@ class Dqn():
         self.q = slim.fully_connected(inputs=self.fc2, num_outputs=nb_action, activation_fn=None, scope="q")
         self.softmax = slim.softmax(self.q * 10, scope="softmax")
         slim.summary.tensor_summary("softmax", self.softmax)
-        self.chosen_action = tf.argmax(self.softmax, axis=1)
+        self.chosen_action = tf.multinomial(self.softmax, 1)
 
         self.action = tf.placeholder(shape=[40], dtype=tf.int32)
         self.target = tf.placeholder(shape=[40], dtype=tf.float32)
@@ -82,7 +82,7 @@ class Dqn():
     def update(self, new_signal):
         q_orig, softmax, action_value = self.sess.run([self.q, self.softmax, self.chosen_action],
                                                       feed_dict={self.input_tensor: [new_signal]})
-        action = action_value[0]
+        action = action_value[0][0]
 
         return action
 
