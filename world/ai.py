@@ -3,9 +3,9 @@ from abc import ABCMeta, abstractmethod
 from world.ai_input_provider import AiInputProvider
 
 
-class SelfDrivingCarAI:
+class AI:
     def __init__(self, params, dqn_initializator):
-        self.brain = dqn_initializator(params.input_size, AiActionProvider.NUMBER_OF_ACTIONS, params.gamma)
+        self.brain = dqn_initializator(params, AiActionProvider.NUMBER_OF_ACTIONS)
 
     def get_next_action(self, input):
         action = self.brain.update(input)

@@ -73,7 +73,8 @@ class environment():
 	def receiveState(self):
 		# Receive state formed as binary array
 		data = self.recvConn.recv(2048);
-		# decode state
+		print ('this is data ',data)
+        # decode state
 		return self.decodeState(data)
 
 	def decodeState(self, data):

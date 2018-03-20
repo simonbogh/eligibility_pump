@@ -9,28 +9,23 @@ import time
 # Importing Python files
 from infra.save_orchestrator import SaveOrchestrator
 from infra.score_history import ScoreHistory
-from world.ai import SelfDrivingCarAI
+from world.ai import AI
 from world.ai_input_provider import AiInputProvider
-from world.game_updater import GameUpdater
+from world.updater import Updater
 from world.reward_calculator import RewardCalculator
 from world.env import environment
-
-TF, KERAS, TF_DOUBLE = ("tf", "keras", "tf_double")
+from ai.tf.ai_self_tf import Dqn
 
 parser = argparse.ArgumentParser(description='Run Pump AI.')
-parser.add_argument('-im', help='(im = implement) - Select implementation to run', choices=[TF, KERAS, TF_DOUBLE])
 parser.add_argument('-sb', help='(sb = Start Brain) - Name of brain to start with, from saves/brains')
 parser.add_argument('-eb', help='(eb = End Brain) - Name of brain to write to after the iterations are done, from saves/brains')
 parser.add_argument('-en', type=int, help='(en = eligibility trace steps n) - How many steps should eligiblity trace take (1 is default, is simple one step Q learning)')
+parser.add_argument('-lr', type=int, help='(lr = Learning rate) - (0.001 is default')
+parser.add_argument('-gamma', type=int, help='(gamma = Discount factor) - (0.9 is default')
+parser.add_argument('-tau', type=int, help='(tau = Temperature) - (50 is default')
+
 
 args = parser.parse_args()
-
-if args.im == TF:
-    from ai.tf.ai_self_tf import Dqn
-elif args.im == TF_DOUBLE:
-    from ai.tf.ai_self_tf_dualq import Dqn
-elif args.im == KERAS:
-    from ai.ai_self_keras import Dqn
 
 # Adding this line if we don't want the right click to put a red point
 SAVES = "./saves"
@@ -43,19 +38,19 @@ def ensure_dir(path):
 ensure_dir(SAVES)
 ensure_dir(SAVES_BRAINS)
 
-
-n_steps = args.en if args.en else 1
-
 # Gathering all the parameters (that we can modify to explore)
 class Params():
     def __init__(self):
 		# Parameter of algorithm
-        self.lr = 0.001
-        self.gamma = 0.9
-        self.ER_batch_size = 100
+        self.lr = 0
+        self.gamma = 0
+        self.tau = 0
+        self.ER_sample_size = 160
+        self.ER_batch_size = 300
         self.ER_capacity = 100000
         self.input_size = 2
-        self.action_size = 3
+        self.h_neurons = 30
+        self.n_steps = 0
         self.goalT1 = 27
         self.goalT2 = 0
         self.goalT3 = 0
@@ -68,8 +63,15 @@ class Params():
 env = environment()
 env.createServerSockets()
 
-# Parameters
+# Default parameters
 params = Params()
+
+# Chosen parameters
+params.n_steps = args.en if args.en else 1
+params.lr  = args.lr if args.lr else 0.001
+params.gamma = args.gamma if args.gamma else 0.9
+params.tau = args.tau if args.tau else 50
+
 
 # Creating score history
 score_history = ScoreHistory()
@@ -79,13 +81,13 @@ reward_calculator = RewardCalculator(params)
 ai_input_provider = AiInputProvider(params)
 
 # Creating brain
-ai = SelfDrivingCarAI(params, Dqn)
+ai = AI(params, Dqn)
 
 # Create brain module in folder
 save_orchestrator = SaveOrchestrator("saves/", ai.brain)
 
 
-training = GameUpdater(reward_calculator, ai_input_provider, ai, score_history, env, n_steps)
+training = Updater(reward_calculator, ai_input_provider, ai, score_history, env, params)
 
 if args.sb:
     save_orchestrator.load_brain(os.path.join(SAVES_BRAINS, args.sb))

@@ -6,32 +6,29 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from future.utils import lmap
 
-HIDDEN_LAYER_SIZE = 30
-
-
 class Dqn():
-    def __init__(self, input_size, nb_action, gamma):
+    def __init__(self, params, nb_action):
         try:
             shutil.rmtree("train/")
         except OSError:
             print("")
+        self.params = params
         self.reward_window = []
-        self.gamma = gamma
         self.last_action = 0
-        self.last_state = np.zeros(input_size)
+        self.last_state = np.zeros(params.input_size)
         self.num_action = nb_action
 
-        self.input_tensor = tf.placeholder(shape=[None, input_size], dtype=tf.float32)
+        self.input_tensor = tf.placeholder(shape=[None, params.input_size], dtype=tf.float32)
 
-        self.fc1 = slim.fully_connected(inputs=self.input_tensor, num_outputs=30, activation_fn=tf.nn.relu, scope="fc1")
-        self.fc2 = slim.fully_connected(inputs=self.fc1, num_outputs=30, activation_fn=tf.nn.relu, scope="fc2")
+        self.fc1 = slim.fully_connected(inputs=self.input_tensor, num_outputs=params.h_neurons, activation_fn=tf.nn.relu, scope="fc1")
+        self.fc2 = slim.fully_connected(inputs=self.fc1, num_outputs=params.h_neurons, activation_fn=tf.nn.relu, scope="fc2")
         self.q = slim.fully_connected(inputs=self.fc2, num_outputs=nb_action, activation_fn=None, scope="q")
-        self.softmax = slim.softmax(self.q * 10, scope="softmax")
+        self.softmax = slim.softmax(self.q * params.tau, scope="softmax")
         slim.summary.tensor_summary("softmax", self.softmax)
         self.chosen_action = tf.multinomial(self.softmax, 1)
 
-        self.action = tf.placeholder(shape=[40], dtype=tf.int32)
-        self.target = tf.placeholder(shape=[40], dtype=tf.float32)
+        self.action = tf.placeholder(shape=[params.ER_sample_size], dtype=tf.int32)
+        self.target = tf.placeholder(shape=[params.ER_sample_size], dtype=tf.float32)
 
         self.hot = slim.one_hot_encoding(self.action, self.num_action, scope="one_hot")
         self.predictions = tf.reduce_sum(self.hot * self.q, axis=1)
@@ -56,7 +53,7 @@ class Dqn():
     def calculate_transition_reward(self, transition):
         def decay_reward(tup):
             r, i = tup
-            return self.gamma ** i * r
+            return self.params.gamma ** i * r
 
         return sum(lmap(decay_reward, zip(lmap(lambda t: t.reward, reversed(transition[:-1])), range(transition.n - 1))))
 
@@ -69,7 +66,7 @@ class Dqn():
         rewards = np.array(lmap(self.calculate_transition_reward, transitions))
         actions = np.array(lmap(lambda transition: transition[0].action, transitions))
         next_max_qs = next_stateQs.max(1)
-        target = ((self.gamma ** len(transitions)) * next_max_qs) + rewards
+        target = ((self.params.gamma ** len(transitions)) * next_max_qs) + rewards
 
         predictions, loss, training, summary = self.sess.run(
             [self.predictions, self.loss, self.training, self.summary_op],
