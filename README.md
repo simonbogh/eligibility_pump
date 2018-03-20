@@ -13,9 +13,12 @@ see if you algorithm can hit a sudden reference temperature which in this case i
 
 Parameters to on main.py:  
     -im -- (im = implement) - Select implementation to run  
-    -sb -- (sb = Start Brain) - Name of brain to start with, from saves/brains')  
-    -eb -- (eb = End Brain) - Name of brain to write to after the iterations are done, from saves/brains')  
-    -en -- (en = eligibility trace steps n) - How many steps should eligiblity trace steps take (1 is default, is simple one step Q learning)  
+    -sb -- (sb = Start Brain) - Name of brain to start with, from saves/brains'
+    -eb -- (eb = End Brain) - Name of brain to write to after the iterations are done, from saves/brains'
+    -en -- (en = eligibility trace steps n) - How many steps should eligiblity trace steps take (1 is default, is simple one step Q learning
+    -lr -- (lr = Learning rate) - 0.001 is default
+    -gamma -- (gamma = Discount factor) - 0.9 is default'
+    -tau' -- (tau = Temperature for softmax function) - 50 is default'
     
 Forexample, here tensorflow (the currently only ai running) where the end brain
 that will be saved will be called brainski. Further more is the eligibility
