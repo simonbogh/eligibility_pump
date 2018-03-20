@@ -11,7 +11,6 @@ class RewardCalculator:
         # Values from environment
         T1, T2, T3, T4, Tsource = env_values[0], env_values[1], env_values[2], env_values[3], env_values[4]
         
-        print('Troom is ', T1)
 		# Absolute distance from temperatures to goal
         distance = ((abs(self.params.goalT1 - T1)))# + abs(signalT1 - goal_T2) + abs(signalT1 - goal_T3) + abs(signalT1 - goal_T4))/4)
         print('distance is ', distance)

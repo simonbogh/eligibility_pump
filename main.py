@@ -92,6 +92,10 @@ if args.sb:
 
 iter = 0
 
+# Have to send the first communication to Simulink in order to start the simulation
+env.sendAction(0)
+
+
 while True:
     print('------------------------------------------------')
     print('iteration ', iter)
@@ -99,9 +103,6 @@ while True:
     
     # Sleep in order to make sure Simulink and Python can have a good TCP/IP communication
     time.sleep(0.1)
-	
-    # Have to send the first communication to Simulink in order to start the simulation
-    env.sendAction(0)
     
     # Update brain
     training.update()

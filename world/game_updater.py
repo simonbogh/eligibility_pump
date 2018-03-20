@@ -15,17 +15,20 @@ class GameUpdater:
         self.last_transitions = deque()
         self.step = 0
         self.state = []
+        self.env_values = []
 
     def update(self):
-        #Receive values from Simulink environment
-        env_values = self.env.receiveState()
         
         # Convert environment values to state inputs
         if self.step == 0: #In order not to have to much communication
-            self.state = self.ai_input_provider.calculate_ai_input(env_values)
+            #Receive values from Simulink environment
+            self.env_values = self.env.receiveState()
+            
+            self.state = self.ai_input_provider.calculate_ai_input(self.env_values)
             self.step += 1
         
-		# Select action
+        print('Troom is ', self.env_values[0])
+        # Select action
         action = self.ai.get_next_action(self.state)
         
         # Send action to environment
@@ -33,18 +36,18 @@ class GameUpdater:
         self.env.sendAction(action)
         
         # Calculate reward from environment values
-        reward = self.reward_calculator.calculate_reward(env_values)
+        reward = self.reward_calculator.calculate_reward(self.env_values)
         
         # save to memory
         self.ai.brain.append_reward(reward)
         self.score_history.append(self.ai.score())
         
         # Receive new state from Simulink Environment
-        env_values = self.env.receiveState()
+        self.env_values = self.env.receiveState()
         
         # Convert environment values to state inputs
-        env_values = self.env.receiveState()
-        next_state = self.ai_input_provider.calculate_ai_input(env_values)
+        self.env_values = self.env.receiveState()
+        next_state = self.ai_input_provider.calculate_ai_input(self.env_values)
         self.last_transitions.append(Transition(self.state, action, reward, next_state))
 		# Update
         self.state = next_state
