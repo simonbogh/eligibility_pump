@@ -1,2 +1,2 @@
-model_checkpoint_path: "brainski"
-all_model_checkpoint_paths: "brainski"
+model_checkpoint_path: "brain"
+all_model_checkpoint_paths: "brain"

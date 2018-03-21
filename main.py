@@ -41,21 +41,31 @@ ensure_dir(SAVES_BRAINS)
 # Gathering all the parameters (that we can modify to explore)
 class Params():
     def __init__(self):
-		# Parameter of algorithm
+		# Parameter of RL
         self.lr = 0
         self.gamma = 0
+        # Softmax
         self.tau = 0
+        #Epsilon Greedy
+        self.eps_start = 0.9
+        self.eps_end = 0.05
+        self.eps_decay = 2000
+        # Replay Memory
         self.ER_sample_size = 160
         self.ER_batch_size = 300
         self.ER_capacity = 100000
+        # Neural Network
         self.input_size = 2
         self.h_neurons = 30
+        # Eligibility trace steps
         self.n_steps = 0
+        # Reference
         self.goalT1 = 27
         self.goalT2 = 0
         self.goalT3 = 0
         self.goalT4 = 0
-
+		# Action selector
+        self.action_selector = 2 #1 Softmax #2 Epsilon Greedy
 
 # Running the whole thing
 
@@ -71,7 +81,7 @@ params.n_steps = args.en if args.en else 1
 params.lr  = args.lr if args.lr else 0.001
 params.gamma = args.gamma if args.gamma else 0.9
 params.tau = args.tau if args.tau else 50
-
+args.eb = args.eb if args.eb else 'brain'
 
 # Creating score history
 score_history = ScoreHistory()

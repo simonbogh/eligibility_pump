@@ -5,6 +5,8 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from future.utils import lmap
+import random
+import math
 
 class Dqn():
     def __init__(self, params, nb_action):
@@ -49,6 +51,7 @@ class Dqn():
         init = tf.global_variables_initializer()
         self.saver = tf.train.Saver()
         self.sess.run(init)
+        self.steps_done = 0
 
     def calculate_transition_reward(self, transition):
         def decay_reward(tup):
@@ -79,10 +82,30 @@ class Dqn():
     def update(self, new_signal):
         q_orig, softmax, action_value = self.sess.run([self.q, self.softmax, self.chosen_action],
                                                       feed_dict={self.input_tensor: [new_signal]})
-        action = action_value[0][0]
 
+        #After ending in a state its time to play a action
+        if self.params.action_selector == 1: #Softmax
+            action = action_value[0][0]
+        elif self.params.action_selector == 2: # epsilon_greedy
+            action = self.epsilon_greedy()
+        
         return action
 
+    def epsilon_greedy(self):
+			
+        sample = random.random()
+        eps_threshold = self.params.eps_end + (self.params.eps_start - self.params.eps_end) * \
+            math.exp(-1. * self.steps_done / self.params.eps_decay)       
+       
+        if sample > eps_threshold:
+            action = np.argmax(self.softmax)
+            self.steps_done += 1
+            return action
+        else:
+            action = random.randrange(0,self.num_action)
+            self.steps_done += 1
+            return action
+        
     def append_reward(self, reward):
         self.reward_window.append(reward)
 
