@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from world.ai_input_provider import AiInputProvider
+from models.eligibility_trace.world.ai_input_provider import AiInputProvider
 
 
 class AI:

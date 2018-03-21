@@ -1,6 +1,6 @@
 from collections import deque
 
-from world.memory.n_step_replay_memory import NStepReplayMemory, Transition, NStepTransition
+from models.eligibility_trace.world.memory.n_step_replay_memory import NStepReplayMemory, Transition, NStepTransition
 
 
 class Updater:
