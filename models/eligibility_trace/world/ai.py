@@ -2,11 +2,10 @@ from abc import ABCMeta, abstractmethod
 
 class AI:
     def __init__(self, params, dqn_initializator):
-        self.brain = dqn_initializator(params, AiActionProvider.NUMBER_OF_ACTIONS)
+        self.brain = dqn_initializator(params)
 
     def get_next_action(self, input):
-        action = self.brain.update(input)
-        return AiActionProvider.ACTIONS[action]
+        return self.brain.update(input)
 
     def score(self):
         return self.brain.score()
@@ -14,7 +13,3 @@ class AI:
 
 class AiAction:
     __metaclass__ = ABCMeta
-
-class AiActionProvider:
-    ACTIONS = [1, 2, 3]
-    NUMBER_OF_ACTIONS = len(ACTIONS)

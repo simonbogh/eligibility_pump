@@ -9,7 +9,7 @@ import random
 import math
 
 class Dqn():
-    def __init__(self, params, nb_action):
+    def __init__(self, params):
         try:
             shutil.rmtree("models/eligibility_trace/train/")
         except OSError:
@@ -18,13 +18,13 @@ class Dqn():
         self.reward_window = []
         self.last_action = 0
         self.last_state = np.zeros(params.input_size)
-        self.num_action = nb_action
+        self.num_action = params.action_size
 
         self.input_tensor = tf.placeholder(shape=[None, params.input_size], dtype=tf.float32)
 
         self.fc1 = slim.fully_connected(inputs=self.input_tensor, num_outputs=params.hidden_size, activation_fn=tf.nn.relu, scope="fc1")
         self.fc2 = slim.fully_connected(inputs=self.fc1, num_outputs=params.hidden_size, activation_fn=tf.nn.relu, scope="fc2")
-        self.q = slim.fully_connected(inputs=self.fc2, num_outputs=nb_action, activation_fn=None, scope="q")
+        self.q = slim.fully_connected(inputs=self.fc2, num_outputs=params.action_size, activation_fn=None, scope="q")
         self.softmax = slim.softmax(self.q * params.tau, scope="softmax")
         slim.summary.tensor_summary("softmax", self.softmax)
         self.chosen_action = tf.multinomial(self.softmax, 1)

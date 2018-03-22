@@ -31,10 +31,10 @@ class Updater:
         print('Enrionment Values are ', self.env_values)
         # Select action
         action = self.ai.get_next_action(self.state)
-        print ('action is ', action)
+        print ('action is ', action + 1)
         
         # Send action to environment
-        self.env.sendAction(action)
+        self.env.sendAction(action + 1)
         
         # Calculate reward from environment values
         reward = self.reward_calculator.calculate_reward(self.env_values)
