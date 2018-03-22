@@ -11,13 +11,13 @@ see if you algorithm can hit a sudden reference temperature which in this case i
 * matplotlib
   
   
-# Parameters to on main.py:  
+# Parameters to run on main.py:  
     -sb -- (sb = Start Brain) - Name of brain to start with, from saves/brains'  
     -eb -- (eb = End Brain) - Name of brain to write to after the iterations are done, from saves/brains' (same name of plot will be in saves/plots)  
     -en -- (en = eligibility trace steps n) - How many steps should eligiblity trace steps take (1 is default, is simple one step Q learning  
     -lr -- (lr = Learning rate) - 0.001 is default  
     -gamma -- (gamma = Discount factor) - 0.9 is default'  
-    -tau' -- (tau = Temperature for softmax function) - 50 is default'  
+    -tau -- (tau = Temperature for softmax function) - 50 is default'  
     -hn -- (hd = hidden neurons) - For neural network (30 is default with one hidden layer')  
     -tau -- (tau = Temperature) - For Softmax function (50 is default')  
     -es -- (es = Epsilon start) - For epsilon Greedy start value, meaning random action is taken 90% of the time (0.9 is default')  
