@@ -22,8 +22,8 @@ class Dqn():
 
         self.input_tensor = tf.placeholder(shape=[None, params.input_size], dtype=tf.float32)
 
-        self.fc1 = slim.fully_connected(inputs=self.input_tensor, num_outputs=params.h_neurons, activation_fn=tf.nn.relu, scope="fc1")
-        self.fc2 = slim.fully_connected(inputs=self.fc1, num_outputs=params.h_neurons, activation_fn=tf.nn.relu, scope="fc2")
+        self.fc1 = slim.fully_connected(inputs=self.input_tensor, num_outputs=params.hidden_size, activation_fn=tf.nn.relu, scope="fc1")
+        self.fc2 = slim.fully_connected(inputs=self.fc1, num_outputs=params.hidden_size, activation_fn=tf.nn.relu, scope="fc2")
         self.q = slim.fully_connected(inputs=self.fc2, num_outputs=nb_action, activation_fn=None, scope="q")
         self.softmax = slim.softmax(self.q * params.tau, scope="softmax")
         slim.summary.tensor_summary("softmax", self.softmax)
@@ -117,11 +117,10 @@ class Dqn():
 
     def load(self, filepath):
         if os.path.exists(filepath):
-            print("===>> Loading checkpoint ...")
+            print("===>> Loading brain ...")
             filepath, _ = os.path.splitext(filepath)
             self.saver = tf.train.import_meta_graph(filepath + ".meta")
-            # dir, filename = os.path.split(filepath)
             self.saver.restore(self.sess, filepath)
-            print("Loaded checkpoint")
+            print("Loading is complete")
         else:
-            print("Nothing to load")
+            print("No brain found")

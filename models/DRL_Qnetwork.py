@@ -1,16 +1,4 @@
-# AI for Self Driving Car
-
-#Settings to adjust inorder to get a better algorithm
-# reward policy
-	# Less punishment to increase distance from goal
-	# if car is more than 10s to find goal then punish
-# more hidden layers
-# more hidden neurons
-# gamma
-# optimizer
-
 # Importing the libraries
-
 import numpy as np
 import random # random samples from different batches (experience replay)
 import os # For loading and saving brain
@@ -25,25 +13,21 @@ import torch.autograd as autograd # Conversion from tensor (advanced arrays) to 
 from torch.autograd import Variable
 # to convert this tensor into a variable containing the tensor and the gradient
 
-
 # Creating the architecture of the Neural Network
 class Network(nn.Module): #inherinting from nn.Module
     
     #Self - refers to the object that will be created from this class
     #     - self here to specify that we're referring to the object
-    def __init__(self, input_size, nb_action): #[self,input neuroner, output neuroner]
+    def __init__(self, params): #[self,input neuroner, output neuroner]
         super(Network, self).__init__() #inorder to use modules in torch.nn
-        # Input and output neurons
-        self.input_size = input_size
-        self.nb_action = nb_action
         # Full connection between different layers of NN
         # In this example its one input layer, one hidden layer and one output layer
         # Using self here to specify that fc1 is a variable of my object
-        self.fc1 = nn.Linear(input_size, 30)
+        self.fc1 = nn.Linear(params.input_size, params.hidden_size)
         #Example of adding a hiddenlayer
         # self.fc2 = nn.Linear(30,30)
 		# self.fc3 = nn.Linear(30,30)
-        self.fc2 = nn.Linear(30, nb_action) # 30 neurons in hidden layer
+        self.fc2 = nn.Linear(params.hidden_size, params.action_size) # 30 neurons in hidden layer
     
     # For function that will activate neurons and perform forward propagation
     def forward(self, state):
@@ -92,11 +76,11 @@ class DQN():
         # Sliding window of the evolving mean of the last 100 events/transitions
         self.reward_window = []
         #Creating network with network class
-        self.model = Network(params.input_size, params.action_size)
+        self.model = Network(params)
         #creating memory with memory class
         #We gonna take 100000 samples into memory and then we will sample from this memory to 
         #to get a snakk number of random transitions
-        self.memory = ReplayMemory(100000)
+        self.memory = ReplayMemory(params.ER_capacity)
         #creating optimizer (stochastic gradient descent)
         self.optimizer = optim.Adam(self.model.parameters(), lr = params.lr) #learning rate
         #input vector which is batch of input observations
@@ -178,18 +162,18 @@ class DQN():
     
     def score(self):
         return sum(self.reward_window)/(len(self.reward_window)+1.)
-    
-    def save(self):
+        
+    def save_brain(self, path, name):
         torch.save({'state_dict': self.model.state_dict(),
                     'optimizer' : self.optimizer.state_dict(),
-                   }, 'last_brain.pth')
+                   }, os.path.join(path, str(name) + '.pth'))
     
-    def load(self):
-        if os.path.isfile('last_brain.pth'):
-            print("=> loading checkpoint... ")
-            checkpoint = torch.load('last_brain.pth')
+    def load_brain(self, path, name):
+        if os.path.isfile(os.path.join(path, str(name) + '.pth')):
+            print("=> loading brain... ")
+            checkpoint = torch.load(os.path.join(path, str(name) + '.pth'))
             self.model.load_state_dict(checkpoint['state_dict'])
             self.optimizer.load_state_dict(checkpoint['optimizer'])
-            print("done !")
+            print("Loading is complete !")
         else:
-            print("no checkpoint found...")
+            print("no brain found...")

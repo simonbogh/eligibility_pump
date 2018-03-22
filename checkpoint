@@ -1,2 +1,0 @@
-model_checkpoint_path: "last_brain_tf.tf"
-all_model_checkpoint_paths: "last_brain_tf.tf"

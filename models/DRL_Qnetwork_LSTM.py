@@ -36,11 +36,11 @@ def weights_init(m):
 
 # Creating the architecture of the Neural Network
 class LSTM_QNETWORK(nn.Module): #inherinting from nn.Module
-    def __init__(self, input_size, nb_action): #[self,input neuroner, output neuroner]
+    def __init__(self, params): #[self,input neuroner, output neuroner]
         super(LSTM_QNETWORK, self).__init__() #inorder to use modules in torch.nn
         # Input and output neurons
-        self.lstm = nn.LSTMCell(input_size, 30) # making an LSTM (Long Short Term Memory) to learn the temporal properties of the input
-        self.fcL = nn.Linear(30, nb_action) # full connection of the
+        self.lstm = nn.LSTMCell(params.input_size, params.hidden_size) # making an LSTM (Long Short Term Memory) to learn the temporal properties of the input
+        self.fcL = nn.Linear(params.hidden_size, params.action_size) # full connection of the
         self.apply(weights_init) # initilizing the weights of the model with random weights
         self.fcL.weight.data = normalized_columns_initializer(self.fcL.weight.data, 0.01) # setting the standard deviation of the fcL tensor of weights to 0.01
         self.fcL.bias.data.fill_(0) # initializing the actor bias with zeros
@@ -101,7 +101,7 @@ class DQN_LSTM():
         # Sliding window of the evolving mean of the last 100 events/transitions
         self.reward_window = []
         #Creating network with network class
-        self.model = LSTM_QNETWORK(params.input_size, params.action_size)
+        self.model = LSTM_QNETWORK(params)
         #creating memory with memory class
         #We gonna take 100000 samples into memory and then we will sample from this memory to 
         #to get a snakk number of random transitions
@@ -198,17 +198,17 @@ class DQN_LSTM():
     def score(self):
         return sum(self.reward_window)/(len(self.reward_window)+1.)
     
-    def save(self):
+    def save_brain(self, path, name):
         torch.save({'state_dict': self.model.state_dict(),
                     'optimizer' : self.optimizer.state_dict(),
-                   }, 'last_brain.pth')
+                   }, os.path.join(path, str(name) + '.pth'))
     
-    def load(self):
-        if os.path.isfile('last_brain.pth'):
-            print("=> loading checkpoint... ")
-            checkpoint = torch.load('last_brain.pth')
+    def load_brain(self, path, name):
+        if os.path.isfile(os.path.join(path, str(name) + '.pth')):
+            print("=> loading brain... ")
+            checkpoint = torch.load(os.path.join(path, str(name) + '.pth'))
             self.model.load_state_dict(checkpoint['state_dict'])
             self.optimizer.load_state_dict(checkpoint['optimizer'])
-            print("done !")
+            print("Loading is complete !")
         else:
-            print("no checkpoint found...")
+            print("no brain found...")

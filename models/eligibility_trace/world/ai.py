@@ -1,8 +1,5 @@
 from abc import ABCMeta, abstractmethod
 
-from models.eligibility_trace.world.ai_input_provider import AiInputProvider
-
-
 class AI:
     def __init__(self, params, dqn_initializator):
         self.brain = dqn_initializator(params, AiActionProvider.NUMBER_OF_ACTIONS)
