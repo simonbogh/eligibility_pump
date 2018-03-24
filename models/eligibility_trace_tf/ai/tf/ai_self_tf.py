@@ -11,7 +11,7 @@ import math
 class Dqn():
     def __init__(self, params):
         try:
-            shutil.rmtree("models/eligibility_trace/train/")
+            shutil.rmtree("models/eligibility_trace_tf/tensorboard/")
         except OSError:
             print("")
         self.params = params
@@ -47,7 +47,7 @@ class Dqn():
         self.ctr = 0
 
         self.summary_op = slim.summary.merge_all()
-        self.train_writer = tf.summary.FileWriter('models/eligibility_trace/train/', sess.graph)
+        self.train_writer = tf.summary.FileWriter('models/eligibility_trace_tf/tensorboard/', sess.graph)
         init = tf.global_variables_initializer()
         self.saver = tf.train.Saver()
         self.sess.run(init)

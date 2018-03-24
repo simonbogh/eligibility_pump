@@ -1,10 +1,7 @@
 # Importing the libraries
 import matplotlib.pyplot as plt
 import os
-
-# Getting our AI, which we call "brain", and that contains our neural network that represents our Q-function
-#last_reward = 0 # updates reward
-#scores = [] # contain some of the sum of rewards
+from matplotlib.backends.backend_pdf import PdfPages
 
 # Creating the
 class Training():
@@ -20,17 +17,12 @@ class Training():
     def update(self):
         #Receive values from Simulink environment
         self.env_values = self.env.receiveState()
-        print('Enrionment Values are [T1,T2,T3,T4,Tsource]')
-        print('Enrionment Values are ', self.env_values)
         
         # Convert environment values to states 
         state = self.ai_input_provider.calculate_ai_input(self.env_values)
         
         # Update brain
         action = self.brain.update(self.last_reward, state)
-        
-        # Get action
-        
         
         # Send action to agent in environment
         self.env.sendAction(action + 1)
@@ -52,11 +44,11 @@ class Training():
 		
 	# Saving experience
     def save(self, path, name):
-        plt.plot(self.scores)
+        plt.plot(self.scores, color='red')
         plt.ylabel('Average reward score per epochs')
         plt.xlabel('Training epochs')
         plt.title('Training curves tracking the agent average score')
-        plt.savefig(os.path.join(path, str(name) + '.png'))
+        plt.savefig(os.path.join(path, str(name) + '.pdf'), format='pdf')
 		
 	# Loading experience
     def load(self):

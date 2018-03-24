@@ -19,6 +19,8 @@ class RewardCalculator:
             # Values from environment
             T1, T2, T3, T4, Tsource = env_values[0], env_values[1], env_values[2], env_values[3], env_values[4]
             self.T1, self.T2, self.T3, self.T4, self.Tsource = T1, T2, T3, T4, Tsource
+            print('Enrionment Values are [T1,T2,T3,T4,Tsource]')
+            print('Enrionment Values are [', T1,',', T2,',', T3,',', T4,',', Tsource,']')
         except:
            T1, T2, T3, T4, Tsource = self.T1, self.T2, self.T3, self.T4, self.Tsource
            

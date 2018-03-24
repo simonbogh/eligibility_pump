@@ -1,6 +1,6 @@
 from collections import deque
 
-from models.eligibility_trace.world.memory.n_step_replay_memory import NStepReplayMemory, Transition, NStepTransition
+from models.eligibility_trace_tf.world.memory.n_step_replay_memory import NStepReplayMemory, Transition, NStepTransition
 
 
 class Updater:
@@ -26,9 +26,7 @@ class Updater:
             
             self.state = self.ai_input_provider.calculate_ai_input(self.env_values)
             self.step += 1
-        
-        print('Enrionment Values are [T1,T2,T3,T4,Tsource]')  
-        print('Enrionment Values are ', self.env_values)
+
         # Select action
         action = self.ai.get_next_action(self.state)
         print ('action is ', action + 1)
