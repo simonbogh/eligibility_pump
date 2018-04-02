@@ -30,6 +30,8 @@ class Updater:
         # Select action
         action = self.ai.get_next_action(self.state)
         print ('action is ', action + 1)
+        print('State inputs to brain')
+        print(state)
         
         # Send action to environment
         self.env.sendAction(action + 1)

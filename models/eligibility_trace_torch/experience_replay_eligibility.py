@@ -26,6 +26,8 @@ class NStepProgress:
         history = deque()
         reward = 0.0
         while True:
+            print('State inputs to brain')
+            print(state)
             action = self.ai(np.array([state]))[0][0]
             self.env.sendAction(action + 1)
             print('action is', action + 1)

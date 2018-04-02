@@ -20,6 +20,8 @@ class Training():
         
         # Convert environment values to states 
         state = self.ai_input_provider.calculate_ai_input(self.env_values)
+        print('State inputs to Q-Network')
+        print(state)
         
         # Update brain
         action = self.brain.update(self.last_reward, state)
@@ -49,8 +51,3 @@ class Training():
         plt.xlabel('Training epochs')
         plt.title('Training curves tracking the agent average score')
         plt.savefig(os.path.join(path, str(name) + '.pdf'), format='pdf')
-		
-	# Loading experience
-    def load(self):
-        print("loading last saved brain...")
-        self.brain.load()
