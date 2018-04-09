@@ -9,8 +9,13 @@ class AiInputProvider:
         self.Tmix = 0
         self.Treturn = 0
         self.last_T1 = 0
+        self.last_T2 = 0
+        self.C1_valve = 0
+        self.C2_valve = 0
+        self.C3_valve = 0
+        self.C4_valve = 0
         
-    def calculate_ai_input(self, env_values):
+    def calculate_ai_input(self, env_values, action):
         
         # Try, do to that simulink sometimes sends empty arrays
         # This can happen every 2000 or 15000 times
@@ -23,16 +28,41 @@ class AiInputProvider:
         
         # Standadize input data
         if (T1-self.params.goalT1) <= 0:
-            orientation_std = 0.5
+            orientation1_std = 0.5
         else:
-            orientation_std = -0.5
+            orientation1_std = -0.5
 
-        T1_std = (T1 - 15)/20
-        diff_std = abs((T1 - self.last_T1)* 100)
-        Tmix_std = (Tmix - 15)/20
-        Treturn_std = (T1 - 15)/20
+        if (T2-self.params.goalT2) <= 0:
+            orientation2_std = 0.5
+        else:
+            orientation2_std = -0.5
+            
+        #T1_std = (T1 - 10) / 25
+        #T2_std = (T2 - 10) / 25
+        T1_std = (T1 ) / 35
+        T2_std = (T2 ) / 35
+        diff1_std = abs((T1 - self.last_T1)* 10)
+        diff2_std = abs((T2 - self.last_T2)* 10)
+        Tmix_std = (Tmix - 15)/30
+        Treturn_std = (Treturn - 10)/ 25
         
         # Update
         self.last_T1 = T1
+        self.last_T2 = T2
         
-        return [T1_std, orientation_std, diff_std]#, Treturn_std]#, Tmix_std, Treturn_std]
+        # Circuit valves open or close ?
+        if action ==  4:
+            self.C1_valve = 1
+            self.C2_valve = 1
+        elif action == 5:
+            self.C1_valve = 1
+            self.C2_valve = 0
+        elif action == 6:
+            self.C1_valve = 0
+            self.C2_valve = 1
+        elif action == 7:
+            self.C1_valve = 0
+            self.C2_valve = 0
+            
+        
+        return [T1_std, orientation1_std, diff1_std, self.C1_valve, T2_std, orientation2_std, diff2_std, self.C2_valve, Tmix_std]

@@ -22,8 +22,8 @@ class Params():
         self.n_steps = 0
         # Reference
         self.goalT1 = 22
-        self.goalT2 = 0
-        self.goalT3 = 0
-        self.goalT4 = 0
+        self.goalT2 = 22
+        self.goalT3 = 22
+        self.goalT4 = 22
 		# Action selector
         self.action_selector = 1 #1 Softmax #2 Epsilon Greedy

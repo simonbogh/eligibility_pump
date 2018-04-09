@@ -58,7 +58,7 @@ class Updater:
         if len(self.last_transitions) == self.params.n_steps:
             n_step_transition = NStepTransition(self.last_transitions)
             self.memory.push(n_step_transition)
-            if len(self.memory.memory) > self.params.ER_batch_size:
+            if len(self.memory.memory) > self.params.ER_batch_size and self.params.learning_mode == 1:
                 transition_samples = self.memory.sample(self.params.ER_sample_size)
                 self.ai.brain.learn_from_transitions(transition_samples)
             self.last_transitions = deque()

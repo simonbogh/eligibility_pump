@@ -3,7 +3,8 @@ import numpy as np
 
 class RewardCalculator:
     def __init__(self, params):
-        self.last_distance = 0
+        self.last_distance1 = 0
+        self.last_distance2 = 0
         self.params = params
         self.T1 = 0
         self.T2 = 0
@@ -14,7 +15,7 @@ class RewardCalculator:
         self.count = 0
 
         
-    def calculate_reward(self, env_values):
+    def calculate_reward(self, env_values, Cn_valves):
         
         # Try, do to that simulink sometimes sends empty arrays
         # This can happen every 2000 or 15000 times
@@ -30,22 +31,43 @@ class RewardCalculator:
            
         print('except  called ', self.count)
 		# Absolute distance from temperatures to goal
-        distance = abs(self.params.goalT1 - T1)
-        print('distance is ', distance)
+        distance1 = abs(self.params.goalT1 - T1)
+        distance2 = abs(self.params.goalT2 - T2)
+        print('distance1 is ', distance1)
+        print('distance2 is ', distance2)
         
-		# Reward Policy
-        if 0 <= distance <= 0.5:
-            last_reward = 1
-            if distance < self.last_distance:
-                last_reward = last_reward*distance
-        elif distance < self.last_distance:
-            last_reward = 0.1
-        elif T1 > 29.9 or T1 < 15.1:# or Tmix > 44.9 or Tmix < 15.1:
-            last_reward = -1
+		# Reward Policy - Circuit 1
+        if 0 <= distance1 <= 0.5 and Cn_valves.C1_valve:
+            last_reward1 = 1
+            if distance1 < self.last_distance1:
+                last_reward1 = last_reward1*distance1
+        elif distance1 < self.last_distance1:
+            last_reward1 = 0.1
+        elif T1 < 15.1 or T1 > 29.9 or Tmix < 15.1 or Tmix > 44.9:
+            last_reward1 = -1
         else:
-            last_reward = -0.1*distance
-		#Update
-        self.last_distance = distance
+            last_reward1 = -0.1*distance1
+            
+            
+		# Reward Policy - Circuit 2
+        if 0 <= distance2 <= 0.5 and Cn_valves.C2_valve:
+            last_reward2 = 1
+            if distance2 < self.last_distance2:
+                last_reward2 = last_reward2*distance2
+        elif distance2 < self.last_distance2:
+            last_reward2 = 0.1
+        elif T2 < 15.1 or T2 > 29.9 or Tmix < 15.1 or Tmix > 44.9:
+            last_reward2 = -1
+        else:
+            last_reward2 = -0.1*distance2
+		
+        
+        #Update
+        self.last_distance1 = distance1
+        self.last_distance2 = distance2
+        
+        # Sum rewards and divide by number of circuits
+        last_reward = (last_reward1 + last_reward2) / 2
 
         
         return last_reward

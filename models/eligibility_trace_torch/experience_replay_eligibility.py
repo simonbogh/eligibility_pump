@@ -19,32 +19,37 @@ class NStepProgress:
         self.reward_calculator = reward_calculator
         self.ai_input_provider = ai_input_provider
         self.rewardski = 0
+        self.action = 0
     
     def __iter__(self):
         env_values = self.env.receiveState()
-        state = self.ai_input_provider.calculate_ai_input(env_values)
+        state = self.ai_input_provider.calculate_ai_input(env_values, self.action)
         history = deque()
         reward = 0.0
         while True:
             print('State inputs to brain')
             print(state)
-            action = self.ai(np.array([state]))[0][0]
+            action = self.ai(np.array([state]))[0][0] # due to it start from 0
             self.env.sendAction(action + 1)
             print('action is', action + 1)
             # Gamle step
             env_values = self.env.receiveState()
-            next_state = self.ai_input_provider.calculate_ai_input(env_values)
-            r = self.reward_calculator.calculate_reward(env_values)
+            next_state = self.ai_input_provider.calculate_ai_input(env_values, action + 1)
+            r = self.reward_calculator.calculate_reward(env_values, self.ai_input_provider)
             print('reward is', r)
             reward += r
             self.rewardski = r
             history.append(Step(state = state, action = action, reward = r))
             while len(history) > self.n_step + 1:
+                print('while1')
                 history.popleft()
+                print('while2')
             if len(history) == self.n_step + 1:
                 yield tuple(history)
+                print('yield')
             self.rewards.append(reward)
             state = next_state
+            self.action = action
     
     def rewards_steps(self):
         rewards_steps = self.rewards

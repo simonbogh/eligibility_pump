@@ -146,12 +146,13 @@ class DQN():
         elif self.params.action_selector == 2: # epsilon_greedy
             action = self.epsilon_greedy(new_state)
 			
-        if len(self.memory.memory) > self.params.ER_batch_size:
+        if len(self.memory.memory) > self.params.ER_batch_size and self.params.learning_mode == 1:
             if len(self.memory.memory) > self.params.ER_capacity:
                 del self.memory.memory[0]
                 
             batch_state, batch_next_state, batch_action, batch_reward = self.memory.sample(self.params.ER_batch_size)
             self.learn(batch_state, batch_next_state, batch_reward, batch_action)
+            
         self.last_action = action
         self.last_state = new_state
         self.last_reward = reward

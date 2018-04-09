@@ -181,7 +181,7 @@ class DQN_LSTM():
             action = self.softmax_body(new_state)
         elif self.params.action_selector == 2:
             action = self.epsilon_greedy(new_state)
-        if len(self.memory.memory) > self.params.ER_batch_size:
+        if len(self.memory.memory) > self.params.ER_batch_size and self.params.learning_mode == 1:
             if len(self.memory.memory) > self.params.ER_capacity:
                 del self.memory.memory[0]
             batch_state, batch_next_state, batch_action, batch_reward, batch_hx, batch_cx = self.memory.sample(self.params.ER_batch_size)

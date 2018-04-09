@@ -11,6 +11,8 @@ from shared.env import environment
 from shared.ai_input_provider import AiInputProvider
 from shared.parameters import Params
 
+# For yes and no options
+YES, NO = ("yes", "no")
 # Action Selectors
 SOFTMAX, EPS = ("softmax","eps")
 # Model Types
@@ -27,7 +29,7 @@ parser.add_argument('-lr', type=int, help='(Learning rate) - (0.001 is default')
 parser.add_argument('-gamma', type=int, help='(Discount factor) - (0.9 is default')
 parser.add_argument('-tau', type=int, help='(Temperature) - For Softmax function, note: when choosing torch_dqnet tau should be 1-10 (50 is default')
 parser.add_argument('-es', type=int, help='(Epsilon start) - For epsilon Greedy start value, meaning random action is taken 90%% of the time (0.9 is default)')
-parser.add_argument('-ee', type=int, help='(Epsilon end) - For epsilon Greedy end value, meaning random action is taken 10%% of the time after decay(0.1 is default)')
+parser.add_argument('-ee', type=int, help='(Epsilon end) - For epsilon Greedy end value, meaning random action is taken 5%% of the time after decay(0.05 is default)')
 parser.add_argument('-ed', type=int, help='(Epsilon decay) - For epsilon Greedy, by default decay from 0.9 to 0.1 over 2000 steps (2000 is default')
 parser.add_argument('-acs', help='(action selector) - (softmax is default) Note: epsilon greedy is not made for eligibility trace', choices=[SOFTMAX, EPS])
 parser.add_argument('-en', type=int, help='(eligibility trace steps n) - How many steps should eligiblity trace take (1 is default, is simple one step Q learning)')
@@ -38,9 +40,14 @@ parser.add_argument('-t1', help='Reference temperature in circuit 1 (default 22)
 parser.add_argument('-t2', help='Reference temperature in circuit 2 (default 22)')
 parser.add_argument('-t3', help='Reference temperature in circuit 3 (default 22)')
 parser.add_argument('-t4', help='Reference temperature in circuit 4 (default 22)')
+parser.add_argument('-lm', help='(Learning Mode) - Q-network will be updated if active (Learning mode is active by default)', choices=[NO])
+parser.add_argument('-startup', help=' This set environment to optimal state before proceeding with DRL algorithm (No, not active by default)', choices=[YES])
+
 # Required
 requiredNamed = parser.add_argument_group('required arguments')
 requiredNamed.add_argument('-model', help='torch_dqn, torch_dqnlstm, torch_dqnet is in pytorch and tf_dqnet is in tensorflow (dqn = deep q-network, eli = eligibility_trace)', choices=[TORCH_DQN, TORCH_DQNLSTM, TORCH_DQNET, TF_DQNET], required=True)
+
+
 
 args = parser.parse_args()
 
@@ -70,16 +77,16 @@ params.gamma = args.gamma if args.gamma else 0.9
 params.tau = args.tau if args.tau else 100
 #Epsilon Greedy
 params.eps_start = args.es if args.es else 0.9
-params.eps_end = args.ee if args.ee else 0.1
+params.eps_end = args.ee if args.ee else 0.05
 params.eps_decay = args.ed if args.ed else 2000
 #Experience replay memory
 params.ER_sample_size = args.ers if args.ers else 160
 params.ER_batch_size = args.erb if args.erb else 300
 params.ER_capacity = args.ec if args.erb else 100000
 #Qnetwork
-params.input_size = args.ins if args.ins else 3
+params.input_size = args.ins if args.ins else 9
 params.hidden_size = args.hn if args.hn else 30
-params.action_size = args.asize if args.asize else 3
+params.action_size = args.asize if args.asize else 7
 #Eligibility trace
 params.n_steps = args.en if args.en else 1
 # Reference
@@ -93,7 +100,11 @@ if args.acs == EPS:
     params.action_selector = 2
 else:
     params.action_selector = 1
-
+#learning mode
+if args.lm == NO:
+    params.learning_mode = 0
+else:
+    params.learning_mode = 1
 
 ########### Run the whole thing ###############
 
@@ -177,12 +188,19 @@ elif args.model == TORCH_DQNET:
 # Have to send the first communication to Simulink in order to start the simulation
 env.sendAction(0)
 
+# Start up script inorder to set environment to same position as when we stopped learning
+# This is done because the experience replay does not know how to deal with these "new"
+# states because we delete those from the beginning
+if args.startup == YES:
+    from shared.startup_script import StartUp
+    startup_script = StartUp(params, env)
+    startup_script.start_script()
+
 iter = 0
 while True:
     print('------------------------------------------------')
     print('iteration ', iter)
     t0 = time.time()
-    
     # Sleep in order to make sure Simulink and Python can have a solid TCP/IP communication
     time.sleep(0.1)
     

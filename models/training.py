@@ -13,14 +13,15 @@ class Training():
         self.ai_input_provider = ai_input_provider
         self.last_reward = 0
         self.scores = []
+        self.action = 0
 
     def update(self):
         #Receive values from Simulink environment
         self.env_values = self.env.receiveState()
         
         # Convert environment values to states 
-        state = self.ai_input_provider.calculate_ai_input(self.env_values)
-        print('State inputs to Q-Network')
+        state = self.ai_input_provider.calculate_ai_input(self.env_values, self.action)
+        print('State inputs to brain')
         print(state)
         
         # Update brain
@@ -31,11 +32,14 @@ class Training():
         print('action is ', action + 1)
         
         # Calculate reward from environment values
-        self.last_reward = self.reward_calculator.calculate_reward(self.env_values)
+        self.last_reward = self.reward_calculator.calculate_reward(self.env_values, self.ai_input_provider)
         print('reward is ', self.last_reward)
         
         #update score
         self.scores.append(self.brain.score())
+        
+        #update action
+        self.action = action + 1
         
     
     def actionFromNN(self):

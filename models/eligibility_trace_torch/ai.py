@@ -55,7 +55,7 @@ class Training:
         self.eligibility_memory.run_steps(1)
         
         # Learn when it have enough in buffer and every 20 times inorder not to have a to high execution time of iteration
-        if  len(self.eligibility_memory.buffer) > self.params.ER_batch_size and  len(self.eligibility_memory.buffer) % 60 == 0:
+        if  len(self.eligibility_memory.buffer) > self.params.ER_batch_size and  len(self.eligibility_memory.buffer) % 60 == 0 and self.params.learning_mode == 1:
             self.learn()
         
         # Make window for brain plot
