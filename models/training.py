@@ -16,6 +16,9 @@ class Training():
         self.action = 0
 
     def update(self):
+        # Sleep in order to make sure Simulink and Python can have a solid TCP/IP communication
+        time.sleep(0.1)
+        
         #Receive values from Simulink environment
         self.env_values = self.env.receiveState()
         

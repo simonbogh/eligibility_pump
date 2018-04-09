@@ -18,6 +18,8 @@ class Updater:
         self.env_values = []
 
     def update(self):
+        # Sleep in order to make sure Simulink and Python can have a solid TCP/IP communication
+        time.sleep(0.1)
         
         # Convert environment values to state inputs
         if self.step == 0: #In order not to have to much communication

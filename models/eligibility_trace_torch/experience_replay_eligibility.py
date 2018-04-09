@@ -27,6 +27,8 @@ class NStepProgress:
         history = deque()
         reward = 0.0
         while True:
+            # Sleep in order to make sure Simulink and Python can have a solid TCP/IP communication
+            time.sleep(0.1)
             print('State inputs to brain')
             print(state)
             action = self.ai(np.array([state]))[0][0] # due to it start from 0
@@ -78,5 +80,5 @@ class ReplayMemory:
             entry = next(self.n_steps_iter) # 10 consecutive steps
             self.buffer.append(entry) # we put 200 for the current episode
             samples -= 1
-        while len(self.buffer) > self.capacity: # we accumulate no more than the capacity (10000)
+        while len(self.buffer) > self.capacity: # we accumulate no more than the capacity
             self.buffer.popleft()

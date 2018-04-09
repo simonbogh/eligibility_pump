@@ -10,6 +10,8 @@ class AiInputProvider:
         self.Treturn = 0
         self.last_T1 = 0
         self.last_T2 = 0
+        self.last_T3 = 0
+        self.last_T4 = 0
         self.C1_valve = 0
         self.C2_valve = 0
         self.C3_valve = 0
@@ -37,8 +39,6 @@ class AiInputProvider:
         else:
             orientation2_std = -0.5
             
-        #T1_std = (T1 - 10) / 25
-        #T2_std = (T2 - 10) / 25
         T1_std = (T1 ) / 35
         T2_std = (T2 ) / 35
         diff1_std = abs((T1 - self.last_T1)* 10)
@@ -54,15 +54,82 @@ class AiInputProvider:
         if action ==  4:
             self.C1_valve = 1
             self.C2_valve = 1
-        elif action == 5:
+            self.C3_valve = 1
+            self.C4_valve = 1
+        elif action ==  5:
             self.C1_valve = 1
             self.C2_valve = 0
-        elif action == 6:
+            self.C3_valve = 0
+            self.C4_valve = 0
+        elif action ==  6:
             self.C1_valve = 0
             self.C2_valve = 1
-        elif action == 7:
+            self.C3_valve = 0
+            self.C4_valve = 0
+        elif action ==  7:
             self.C1_valve = 0
             self.C2_valve = 0
+            self.C3_valve = 1
+            self.C4_valve = 0
+        elif action ==  8:
+            self.C1_valve = 0
+            self.C2_valve = 0
+            self.C3_valve = 0
+            self.C4_valve = 1
+        elif action ==  9:
+            self.C1_valve = 1
+            self.C2_valve = 1
+            self.C3_valve = 0
+            self.C4_valve = 0
+        elif action ==  10:
+            self.C1_valve = 0
+            self.C2_valve = 1
+            self.C3_valve = 1
+            self.C4_valve = 0
+        elif action ==  11:
+            self.C1_valve = 0
+            self.C2_valve = 0
+            self.C3_valve = 1
+            self.C4_valve = 1
+        elif action ==  12:
+            self.C1_valve = 1
+            self.C2_valve = 0
+            self.C3_valve = 0
+            self.C4_valve = 1
+        elif action ==  13:
+            self.C1_valve = 1
+            self.C2_valve = 0
+            self.C3_valve = 1
+            self.C4_valve = 0
+        elif action ==  14:
+            self.C1_valve = 0
+            self.C2_valve = 1
+            self.C3_valve = 0
+            self.C4_valve = 1
+        elif action ==  15:
+            self.C1_valve = 1
+            self.C2_valve = 1
+            self.C3_valve = 1
+            self.C4_valve = 0
+        elif action ==  16:
+            self.C1_valve = 1
+            self.C2_valve = 1
+            self.C3_valve = 0
+            self.C4_valve = 1
+        elif action ==  17:
+            self.C1_valve = 1
+            self.C2_valve = 0
+            self.C3_valve = 1
+            self.C4_valve = 1
+        elif action ==  18:
+            self.C1_valve = 0
+            self.C2_valve = 1
+            self.C3_valve = 1
+            self.C4_valve = 1
+        elif action ==  19:
+            self.C1_valve = 0
+            self.C2_valve = 0
+            self.C3_valve = 0
+            self.C4_valve = 0
             
-        
         return [T1_std, orientation1_std, diff1_std, self.C1_valve, T2_std, orientation2_std, diff2_std, self.C2_valve, Tmix_std]

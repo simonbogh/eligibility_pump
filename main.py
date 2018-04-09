@@ -201,8 +201,6 @@ while True:
     print('------------------------------------------------')
     print('iteration ', iter)
     t0 = time.time()
-    # Sleep in order to make sure Simulink and Python can have a solid TCP/IP communication
-    time.sleep(0.1)
     
     # Update brain with received environment values and calculate action
     training.update()
