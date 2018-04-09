@@ -84,9 +84,9 @@ params.ER_sample_size = args.ers if args.ers else 160
 params.ER_batch_size = args.erb if args.erb else 300
 params.ER_capacity = args.ec if args.erb else 100000
 #Qnetwork
-params.input_size = args.ins if args.ins else 9
+params.input_size = args.ins if args.ins else 17
 params.hidden_size = args.hn if args.hn else 30
-params.action_size = args.asize if args.asize else 7
+params.action_size = args.asize if args.asize else 19
 #Eligibility trace
 params.n_steps = args.en if args.en else 1
 # Reference

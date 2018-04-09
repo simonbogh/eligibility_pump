@@ -40,13 +40,37 @@ class StartUp():
                T1, T2, T3, T4, Tmix, Treturn = self.T1, self.T2, self.T3, self.T4, self.Tmix, self.Treturn
 
             # Close valves depending on they have achieved reference temperatures
-            if self.T1 > self.params.goalT1 and self.T2 > self.params.goalT2:
-                self.env.sendAction(7) # Close both valves
+            if self.T1 > self.params.goalT1 and self.T2 > self.params.goalT2 and self.T3 > self.params.goalT3 and self.T4 > self.params.goalT4:
+                self.env.sendAction(19) # Close all valves
                 self.WhileHolder = False
-            elif self.T1 > self.params.goalT1:
-                self.env.sendAction(6) # Close valve 1 and open valve 2
+            elif self.T2 > self.params.goalT2 and self.T3 > self.params.goalT3 and self.T4 > self.params.goalT4:
+                self.env.sendAction(5)
+            elif self.T1 > self.params.goalT1 and self.T3 > self.params.goalT3 and self.T4 > self.params.goalT4:
+                self.env.sendAction(6)
+            elif self.T1 > self.params.goalT1 and self.T2 > self.params.goalT2 and self.T4 > self.params.goalT4:
+                self.env.sendAction(7)
+            elif self.T1 > self.params.goalT1 and self.T2 > self.params.goalT2 and self.T3 > self.params.goalT3:
+                self.env.sendAction(8)
+            elif self.T3 > self.params.goalT3 and self.T4 > self.params.goalT4:
+                self.env.sendAction(9)
+            elif self.T1 > self.params.goalT1 and self.T4 > self.params.goalT4:
+                self.env.sendAction(10)
+            elif self.T1 > self.params.goalT1 and self.T2 > self.params.goalT2:
+                self.env.sendAction(11)
+            elif self.T2 > self.params.goalT2 and self.T3 > self.params.goalT3:
+                self.env.sendAction(12)
+            elif self.T2 > self.params.goalT2 and self.T4 > self.params.goalT4:
+                self.env.sendAction(13)
+            elif self.T1 > self.params.goalT1 and self.T3 > self.params.goalT3:
+                self.env.sendAction(14)
+            elif self.T4 > self.params.goalT4:
+                self.env.sendAction(15)
+            elif self.T3 > self.params.goalT3:
+                self.env.sendAction(16)
             elif self.T2 > self.params.goalT2:
-                self.env.sendAction(5) # Close valve 2 and open valve 1
+                self.env.sendAction(17)
+            elif self.T1 > self.params.goalT1:
+                self.env.sendAction(18) 
             else:
                 self.env.sendAction(30) # Satisfy timeout in simulink by keep sending data
                 
@@ -54,4 +78,3 @@ class StartUp():
         time.sleep(0.1)
         # set Tmix to 35 degrees
         self.env.sendAction(35)
-                

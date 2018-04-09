@@ -29,6 +29,7 @@ class AiInputProvider:
            T1, T2, T3, T4, Tmix, Treturn = self.T1, self.T2, self.T3, self.T4, self.Tmix, self.Treturn
         
         # Standadize input data
+        # Orientation
         if (T1-self.params.goalT1) <= 0:
             orientation1_std = 0.5
         else:
@@ -39,16 +40,37 @@ class AiInputProvider:
         else:
             orientation2_std = -0.5
             
+        if (T3-self.params.goalT3) <= 0:
+            orientation3_std = 0.5
+        else:
+            orientation3_std = -0.5
+
+        if (T4-self.params.goalT4) <= 0:
+            orientation4_std = 0.5
+        else:
+            orientation4_std = -0.5
+            
+        # Room Temperature
         T1_std = (T1 ) / 35
         T2_std = (T2 ) / 35
+        T3_std = (T3 ) / 35
+        T4_std = (T4 ) / 35
+        
+        # Diff
         diff1_std = abs((T1 - self.last_T1)* 10)
         diff2_std = abs((T2 - self.last_T2)* 10)
+        diff3_std = abs((T3 - self.last_T3)* 10)
+        diff4_std = abs((T4 - self.last_T4)* 10)
+        
+        # Mix and return temperature
         Tmix_std = (Tmix - 15)/30
         Treturn_std = (Treturn - 10)/ 25
         
         # Update
         self.last_T1 = T1
         self.last_T2 = T2
+        self.last_T3 = T3
+        self.last_T4 = T4
         
         # Circuit valves open or close ?
         if action ==  4:
@@ -132,4 +154,4 @@ class AiInputProvider:
             self.C3_valve = 0
             self.C4_valve = 0
             
-        return [T1_std, orientation1_std, diff1_std, self.C1_valve, T2_std, orientation2_std, diff2_std, self.C2_valve, Tmix_std]
+        return [T1_std, orientation1_std, diff1_std, self.C1_valve, T2_std, orientation2_std, diff2_std, self.C2_valve, T3_std, orientation3_std, diff3_std, self.C3_valve, T4_std, orientation4_std, diff4_std, self.C4_valve, Tmix_std]

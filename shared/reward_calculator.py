@@ -5,6 +5,8 @@ class RewardCalculator:
     def __init__(self, params):
         self.last_distance1 = 0
         self.last_distance2 = 0
+        self.last_distance3 = 0
+        self.last_distance4 = 0
         self.params = params
         self.T1 = 0
         self.T2 = 0
@@ -33,8 +35,12 @@ class RewardCalculator:
 		# Absolute distance from temperatures to goal
         distance1 = abs(self.params.goalT1 - T1)
         distance2 = abs(self.params.goalT2 - T2)
+        distance3 = abs(self.params.goalT3 - T3)
+        distance4 = abs(self.params.goalT4 - T4)
         print('distance1 is ', distance1)
         print('distance2 is ', distance2)
+        print('distance3 is ', distance3)
+        print('distance3 is ', distance3)
         
 		# Reward Policy - Circuit 1
         if 0 <= distance1 <= 0.5 and Cn_valves.C1_valve:
@@ -60,14 +66,43 @@ class RewardCalculator:
             last_reward2 = -1
         else:
             last_reward2 = -0.1*distance2
+            
+            
+		# Reward Policy - Circuit 3
+        if 0 <= distance3 <= 0.5 and Cn_valves.C3_valve:
+            last_reward3 = 1
+            if distance3 < self.last_distance3:
+                last_reward3 = last_reward3*distance3
+        elif distance3 < self.last_distance3:
+            last_reward3 = 0.1
+        elif T3 < 15.1 or T3 > 29.9 or Tmix < 15.1 or Tmix > 44.9:
+            last_reward3 = -1
+        else:
+            last_reward3 = -0.1*distance3
+            
+            
+		# Reward Policy - Circuit 4
+        if 0 <= distance4 <= 0.5 and Cn_valves.C4_valve:
+            last_reward4            = 1
+            if distance4 < self.last_distance4:
+                last_reward4 = last_reward4*distance4
+        elif distance4 < self.last_distance4:
+            last_reward4 = 0.1
+        elif T4 < 15.1 or T4 > 29.9 or Tmix < 15.1 or Tmix > 44.9:
+            last_reward4 = -1
+        else:
+            last_reward4 = -0.1*distance4
+            
 		
         
         #Update
         self.last_distance1 = distance1
         self.last_distance2 = distance2
+        self.last_distance3 = distance3
+        self.last_distance4 = distance4
         
         # Sum rewards and divide by number of circuits
-        last_reward = (last_reward1 + last_reward2) / 2
+        last_reward = (last_reward1 + last_reward2 + last_reward3 + last_reward4) / 4
 
         
         return last_reward
