@@ -17,11 +17,13 @@ YES, NO = ("yes", "no")
 SOFTMAX, EPS = ("softmax","eps")
 # Model Types
 TORCH_DQN, TORCH_DQNLSTM, TORCH_DQNET, TF_DQNET = ("torch_dqn","torch_dqnlstm", "torch_dqnet", "tf_dqnet")
+# Environment options
+MATLAB, SIMULINK = ("matlab", "simulink")
 
 parser = argparse.ArgumentParser(prog='Pump AI')
 # Optional
-parser.add_argument('-sb', help='(Start Brain) - Name of brain to start with, from saves/brains')
-parser.add_argument('-eb', help='(End Brain) - Name of brain which is saved in saves/brains and name of brain plot which is saved in saves/plots (default brain)')
+parser.add_argument('-sbe', help='(Start Brain and Experience) - Name of brain to start with, from saves/brains')
+parser.add_argument('-ebe', help='(End Brain and Experience) - Name of brain which is saved in saves/brains and name of brain plot which is saved in saves/plots (default is <default_name>)')
 parser.add_argument('-ers', help='(experience replay sample size) - how much to sample when learning, Note: only for tf_dqnet (160 is default)')
 parser.add_argument('-erb', help='(experience replaybatch size) - how much to use when learning (default 300)')
 parser.add_argument('-erc', help='(experience replay capacity) - size of experience replay memory (default 100000)')
@@ -36,18 +38,18 @@ parser.add_argument('-en', type=int, help='(eligibility trace steps n) - How man
 parser.add_argument('-ins', help='(input size) - number of input variables to q-network (default 2)')
 parser.add_argument('-hn', type=int, help='(hidden neurons) - For neural network (30 is default with one hidden layer')
 parser.add_argument('-asize', help='(action size) - number of out variables from q-network (default 2)')
-parser.add_argument('-t1', help='Reference temperature in circuit 1 (default 22)')
-parser.add_argument('-t2', help='Reference temperature in circuit 2 (default 22)')
-parser.add_argument('-t3', help='Reference temperature in circuit 3 (default 22)')
-parser.add_argument('-t4', help='Reference temperature in circuit 4 (default 22)')
+parser.add_argument('-t1', type=int, help='Reference temperature in circuit 1 (default 22)')
+parser.add_argument('-t2', type=int, help='Reference temperature in circuit 2 (default 22)')
+parser.add_argument('-t3', type=int, help='Reference temperature in circuit 3 (default 22)')
+parser.add_argument('-t4', type=int, help='Reference temperature in circuit 4 (default 22)')
 parser.add_argument('-lm', help='(Learning Mode) - Q-network will be updated if active (Learning mode is active by default)', choices=[NO])
 parser.add_argument('-startup', help=' This set environment to optimal state before proceeding with DRL algorithm (No, not active by default)', choices=[YES])
+parser.add_argument('-env', help='Which environment should the agent interact with. "matlab" for Matlab and thereby the experimental setup, "simulink" is default which is simulink environment', choices=[MATLAB])
+
 
 # Required
 requiredNamed = parser.add_argument_group('required arguments')
 requiredNamed.add_argument('-model', help='torch_dqn, torch_dqnlstm, torch_dqnet is in pytorch and tf_dqnet is in tensorflow (dqn = deep q-network, eli = eligibility_trace)', choices=[TORCH_DQN, TORCH_DQNLSTM, TORCH_DQNET, TF_DQNET], required=True)
-
-
 
 args = parser.parse_args()
 
@@ -55,6 +57,7 @@ args = parser.parse_args()
 SAVES = "./saves"
 SAVES_BRAINS = "%s/brains" % SAVES
 SAVES_PLOTS = "%s/plots" % SAVES
+SAVES_EXPERIENCE = "%s/experience" % SAVES
 
 # Ensure directory for brain and plots
 def ensure_dir(path):
@@ -84,9 +87,9 @@ params.ER_sample_size = args.ers if args.ers else 160
 params.ER_batch_size = args.erb if args.erb else 300
 params.ER_capacity = args.ec if args.erb else 100000
 #Qnetwork
-params.input_size = args.ins if args.ins else 17
-params.hidden_size = args.hn if args.hn else 30
-params.action_size = args.asize if args.asize else 19
+params.input_size = args.ins if args.ins else 17 #TL1 = 4 #TL2 = 5 #TL3 = 9 #TL4 = 17
+params.hidden_size = args.hn if args.hn else 60
+params.action_size = args.asize if args.asize else 19 #TL1 = 3 #TL2 = 3 #TL3 = 7 #TL4 = 19
 #Eligibility trace
 params.n_steps = args.en if args.en else 1
 # Reference
@@ -95,7 +98,7 @@ params.goalT2 = args.t2 if args.t2 else 22
 params.goalT3 = args.t3 if args.t3 else 22
 params.goalT4 = args.t4 if args.t4 else 22
 #Name of brain
-args.eb = args.eb if args.eb else 'brain'
+args.ebe = args.ebe if args.ebe else 'default_name'
 if args.acs == EPS:
     params.action_selector = 2
 else:
@@ -105,17 +108,21 @@ if args.lm == NO:
     params.learning_mode = 0
 else:
     params.learning_mode = 1
+# Environment decider
+env_decider = args.env if args.env else SIMULINK
 
 ########### Run the whole thing ###############
 
 # Create standard obejcts for all models
 
 # Creating Connection for sender and receiver socket
-env = environment()
+env = environment(env_decider)
 env.createServerSockets()
 
 # Creating calculaters
 reward_calculator = RewardCalculator(params)
+#from shared.normalizer import Normalizer
+#normalizer = Normalizer(params.input_size)
 ai_input_provider = AiInputProvider(params)
 
 # Load specific files and create specific obects for model with respect to platform
@@ -134,8 +141,8 @@ if args.model == TF_DQNET: # Tensorflow specific code eligibility
     # Creating training object
     training = Updater(reward_calculator, ai_input_provider, ai, score_history, env, params)
     # Load brain if requested
-    if args.sb:
-        save_orchestrator.load_brain(os.path.join(SAVES_BRAINS, args.sb))
+    if args.sbe:
+        save_orchestrator.load_brain(os.path.join(SAVES_BRAINS, args.sbe))
     # Create brain module in folder
     save_orchestrator = SaveOrchestrator("saves/", ai.brain)
     
@@ -157,8 +164,9 @@ elif args.model == TORCH_DQN or args.model == TORCH_DQNLSTM:
     training = Training(params, ai, env, reward_calculator, ai_input_provider)
     
     # Load brain if requested
-    if args.sb:
-        ai.load_brain(os.path.abspath(SAVES_BRAINS), args.sb)
+    if args.sbe:
+        ai.load_brain(os.path.abspath(SAVES_BRAINS), args.sbe)
+        ai.load_experience(os.path.abspath(SAVES_EXPERIENCE), args.sbe)
         
 elif args.model == TORCH_DQNET:
     #Importing Python Files
@@ -180,14 +188,18 @@ elif args.model == TORCH_DQNET:
     # Create training object
     training = Training(params, ai, eligibility_memory, n_steps, dqn)
 
-    # Load brain if requested
-    if args.sb:
-        training.load_brain(os.path.abspath(SAVES_BRAINS), args.sb)
-    
+    # Load brain and experience if requested
+    if args.sbe:
+        training.load_brain(os.path.abspath(SAVES_BRAINS), args.sbe)
+        eligibility_memory.load_experience(os.path.abspath(SAVES_EXPERIENCE), args.sbe)
 
 # Have to send the first communication to Simulink in order to start the simulation
-env.sendAction(0)
-
+if env_decider == SIMULINK:
+    env.sendAction(0)
+    save_iterator = 500 # Save every 500 times to have less computational with simulink
+else:
+    save_iterator = 1 # Keep us updated
+    
 # Start up script inorder to set environment to same position as when we stopped learning
 # This is done because the experience replay does not know how to deal with these "new"
 # states because we delete those from the beginning
@@ -204,24 +216,28 @@ while True:
     
     # Update brain with received environment values and calculate action
     training.update()
-    
-    if iter % 500 == 0: # Save every 500 times to have less computational
+    if iter % save_iterator == 0: 
         if args.model == TF_DQNET:
             # Save brain
-            save_orchestrator.save_brain(os.path.join(SAVES_BRAINS, args.eb))
+            save_orchestrator.save_brain(os.path.join(SAVES_BRAINS, args.ebe))
+            # Save experience (Will not be made)
             # Save brain plot
-            score_history.save_brainplot(os.path.abspath(SAVES_PLOTS), args.eb)
+            score_history.save_brainplot(os.path.abspath(SAVES_PLOTS), args.ebe)
         elif args.model == TORCH_DQN or args.model == TORCH_DQNLSTM:
             # Save brain
-            ai.save_brain(os.path.abspath(SAVES_BRAINS), args.eb)
+            ai.save_brain(os.path.abspath(SAVES_BRAINS), args.ebe)
+            # Save experience replay
+            ai.save_experience(os.path.abspath(SAVES_EXPERIENCE), args.ebe)
             # Save brain plot
-            training.save(os.path.abspath(SAVES_PLOTS), args.eb)
+            training.save(os.path.abspath(SAVES_PLOTS), args.ebe)
         else:
             # Save brain
-            training.save_brain(os.path.abspath(SAVES_BRAINS), args.eb)
+            training.save_brain(os.path.abspath(SAVES_BRAINS), args.ebe)
+            # Save experience replay
+            eligibility_memory.save_experience(os.path.abspath(SAVES_EXPERIENCE), args.ebe)
             # Save brain plot
-            training.save_plot(os.path.abspath(SAVES_PLOTS), args.eb)
-    
+            training.save_plot(os.path.abspath(SAVES_PLOTS), args.ebe)
+
     # Survilance of execution time performance
     t1 = time.time()
     iter += 1

@@ -40,13 +40,19 @@ class RewardCalculator:
         print('distance1 is ', distance1)
         print('distance2 is ', distance2)
         print('distance3 is ', distance3)
-        print('distance3 is ', distance3)
+        print('distance4 is ', distance4)
+        
+        max_dist = 0.5
         
 		# Reward Policy - Circuit 1
-        if 0 <= distance1 <= 0.5 and Cn_valves.C1_valve:
+        if 0 <= distance1 <= max_dist and Cn_valves.C1_valve:
             last_reward1 = 1
             if distance1 < self.last_distance1:
-                last_reward1 = last_reward1*distance1
+                last_reward1 = last_reward1* (1 - distance1)
+        elif 0 <= distance1 <= max_dist:
+            last_reward1 = 0.5
+            if distance1 < self.last_distance1:
+                last_reward1 = last_reward1* (1 - distance1)
         elif distance1 < self.last_distance1:
             last_reward1 = 0.1
         elif T1 < 15.1 or T1 > 29.9 or Tmix < 15.1 or Tmix > 44.9:
@@ -56,10 +62,14 @@ class RewardCalculator:
             
             
 		# Reward Policy - Circuit 2
-        if 0 <= distance2 <= 0.5 and Cn_valves.C2_valve:
+        if 0 <= distance2 <= max_dist and Cn_valves.C2_valve:
             last_reward2 = 1
             if distance2 < self.last_distance2:
-                last_reward2 = last_reward2*distance2
+                last_reward2 = last_reward2* (1 - distance2)
+        elif 0 <= distance2 <= max_dist:
+            last_reward2 = 0.5
+            if distance2 < self.last_distance2:
+                last_reward2 = last_reward2* (1 - distance2)
         elif distance2 < self.last_distance2:
             last_reward2 = 0.1
         elif T2 < 15.1 or T2 > 29.9 or Tmix < 15.1 or Tmix > 44.9:
@@ -69,10 +79,14 @@ class RewardCalculator:
             
             
 		# Reward Policy - Circuit 3
-        if 0 <= distance3 <= 0.5 and Cn_valves.C3_valve:
+        if 0 <= distance3 <= max_dist and Cn_valves.C3_valve:
             last_reward3 = 1
             if distance3 < self.last_distance3:
-                last_reward3 = last_reward3*distance3
+                last_reward3 = last_reward3* (1 - distance3)
+        elif 0 <= distance3 <= max_dist:
+            last_reward3 = 0.5
+            if distance3 < self.last_distance3:
+                last_reward3 = last_reward3* (1 - distance3)
         elif distance3 < self.last_distance3:
             last_reward3 = 0.1
         elif T3 < 15.1 or T3 > 29.9 or Tmix < 15.1 or Tmix > 44.9:
@@ -82,10 +96,14 @@ class RewardCalculator:
             
             
 		# Reward Policy - Circuit 4
-        if 0 <= distance4 <= 0.5 and Cn_valves.C4_valve:
-            last_reward4            = 1
+        if 0 <= distance4 <= max_dist and Cn_valves.C4_valve:
+            last_reward4 = 1
             if distance4 < self.last_distance4:
-                last_reward4 = last_reward4*distance4
+                last_reward4 = last_reward4* (1 - distance4)
+        elif 0 <= distance4 <= max_dist:
+            last_reward4 = 0.5
+            if distance4 < self.last_distance4:
+                last_reward4 = last_reward4* (1 - distance4)
         elif distance4 < self.last_distance4:
             last_reward4 = 0.1
         elif T4 < 15.1 or T4 > 29.9 or Tmix < 15.1 or Tmix > 44.9:
@@ -93,8 +111,6 @@ class RewardCalculator:
         else:
             last_reward4 = -0.1*distance4
             
-		
-        
         #Update
         self.last_distance1 = distance1
         self.last_distance2 = distance2

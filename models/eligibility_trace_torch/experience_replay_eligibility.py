@@ -4,6 +4,8 @@
 import numpy as np
 from collections import namedtuple, deque
 import time
+import pickle
+import os
 
 # Defining one Step
 Step = namedtuple('Step', ['state', 'action', 'reward'])
@@ -43,16 +45,12 @@ class NStepProgress:
             self.rewardski = r
             history.append(Step(state = state, action = action, reward = r))
             while len(history) > self.n_step + 1:
-                print('while1')
                 history.popleft()
-                print('while2')
             if len(history) == self.n_step + 1:
                 yield tuple(history)
-                print('yield')
             self.rewards.append(reward)
             state = next_state
             self.action = action
-    
     def rewards_steps(self):
         rewards_steps = self.rewards
         self.rewards = []
@@ -61,7 +59,7 @@ class NStepProgress:
 # Implementing Experience Replay
 class ReplayMemory:
     
-    def __init__(self, n_steps, capacity = 10000):
+    def __init__(self, n_steps, capacity):
         self.capacity = capacity
         self.n_steps = n_steps
         self.n_steps_iter = iter(n_steps)
@@ -77,8 +75,22 @@ class ReplayMemory:
 
     def run_steps(self, samples):
         while samples > 0:
-            entry = next(self.n_steps_iter) # 10 consecutive steps
-            self.buffer.append(entry) # we put 200 for the current episode
+            entry = next(self.n_steps_iter) # x consecutive steps
+            self.buffer.append(entry) # we put 1 for the current episode
             samples -= 1
         while len(self.buffer) > self.capacity: # we accumulate no more than the capacity
             self.buffer.popleft()
+
+    def save_experience(self, path, name):
+        with open(path + '/' + name, 'wb') as fp:
+            pickle.dump(self.buffer, fp)
+            
+    def load_experience(self, path, name):
+        if os.path.isfile(os.path.join(path, str(name))):
+            print("=> loading experience... ")
+            with open (path + '/' + name, 'rb') as fp:
+                self.buffer = pickle.load(fp)
+            print("Loading is complete !")
+        else:
+            print("no experience found...")
+            exit(1)

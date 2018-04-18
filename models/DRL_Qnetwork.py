@@ -24,16 +24,15 @@ class Network(nn.Module): #inherinting from nn.Module
         # In this example its one input layer, one hidden layer and one output layer
         # Using self here to specify that fc1 is a variable of my object
         self.fc1 = nn.Linear(params.input_size, params.hidden_size)
-        #Example of adding a hiddenlayer
-        # self.fc2 = nn.Linear(30,30)
-		# self.fc3 = nn.Linear(30,30)
-        self.fc2 = nn.Linear(params.hidden_size, params.action_size) # 30 neurons in hidden layer
+        self.fc2 = nn.Linear(params.hidden_size, params.hidden_size)
+        self.fc3 = nn.Linear(params.hidden_size, params.action_size) # 30 neurons in hidden layer
     
     # For function that will activate neurons and perform forward propagation
     def forward(self, state):
         # rectifier function
         x = F.relu(self.fc1(state))
-        q_values = self.fc2(x)
+        x = F.relu(self.fc2(x))
+        q_values = self.fc3(x)
         return q_values
 
 # Implementing Experience Replay
@@ -178,3 +177,18 @@ class DQN():
             print("Loading is complete !")
         else:
             print("no brain found...")
+            exit(1)
+            
+    def save_experience(self, path, name):
+        with open(path + '/' + name, 'wb') as fp:
+            pickle.dump(self.buffer, fp)
+            
+    def load_experience(self, path, name):
+        if os.path.isfile(os.path.join(path, str(name))):
+            print("=> loading experience... ")
+            with open (path + '/' + name, 'rb') as fp:
+                self.buffer = pickle.load(fp)
+            print("Loading is complete !")
+        else:
+            print("no experience found...")
+            exit(1)

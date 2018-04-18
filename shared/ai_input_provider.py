@@ -1,6 +1,7 @@
 
 class AiInputProvider:
     def __init__(self, params):
+        #self.normalizer = normalizer
         self.params = params
         self.T1 = 0
         self.T2 = 0
@@ -153,5 +154,29 @@ class AiInputProvider:
             self.C2_valve = 0
             self.C3_valve = 0
             self.C4_valve = 0
-            
-        return [T1_std, orientation1_std, diff1_std, self.C1_valve, T2_std, orientation2_std, diff2_std, self.C2_valve, T3_std, orientation3_std, diff3_std, self.C3_valve, T4_std, orientation4_std, diff4_std, self.C4_valve, Tmix_std]
+        
+        orientation1 = (T1-self.params.goalT1)
+        orientation2 = (T2-self.params.goalT2)
+        orientation3 = (T3-self.params.goalT3)
+        orientation4 = (T4-self.params.goalT4)
+        
+        diff1 = abs(T1 - self.last_T1)
+        diff2 = abs(T2 - self.last_T2)
+        diff3 = abs(T3 - self.last_T3)
+        diff4 = abs(T4 - self.last_T4)
+        
+        # Standadize
+        state =  [T1_std, orientation1_std, diff1_std, self.C1_valve, T2_std, orientation2_std, diff2_std, self.C2_valve, T3_std, orientation3_std, diff3_std, self.C3_valve, T4_std, orientation4_std, diff4_std, self.C4_valve, Tmix_std]
+        
+        # Normalize
+        #state =  [T1, orientation1, diff1, self.C1_valve, T2, orientation2, diff2, self.C2_valve, T3, orientation3, diff3, self.C3_valve, T4, orientation4, diff4, self.C4_valve, Tmix]
+        #self.normalizer.observe(state)
+        #state = normalizer.normalize(state)
+        #state[3] = self.C1_valve
+        #state[7] = self.C2_valve
+        #state[11] = self.C3_valve
+        #state[15] = self.C4_valve
+        
+        
+        return state
+        

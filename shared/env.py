@@ -6,17 +6,20 @@ import sys
 import struct
 import array
 
-class environment():
-	
-	# Connection for sender socket
-	global sendConn
-	sendHost = 'localhost'  # Symbolic name meaning all available interfaces
-	sendPort = 50000        # Arbitrary non-privileged port
-	# Connection for receiver socket
-	global recvConn
-	recvHost = 'localhost'  # Symbolic name meaning all available interfaces
-	recvPort = 50001        # Arbitrary non-privileged port
-	global last_data
+SIMULINK = "simulink"
+
+class environment:
+	def __init__(self, env_decider):
+		self.env_decider = env_decider
+        # Connection for sender socket
+		self.sendConn = 0
+		self.sendHost = 'localhost'  # Symbolic name meaning all available interfaces
+		self.sendPort = 50000        # Arbitrary non-privileged port
+		# Connection for receiver socket
+		self.recvConn = 0
+		self.recvHost = 'localhost'  # Symbolic name meaning all available interfaces
+		self.recvPort = 50001        # Arbitrary non-privileged port
+		self.last_data = 0
 	
 	# Creating server Socket
 	def createServerSockets(self):
@@ -73,11 +76,26 @@ class environment():
 	def receiveState(self):
 		# Receive state formed as binary array
 		data = self.recvConn.recv(2048);
-        
 		# decode state
-		return self.decodeState(data)
+		if self.env_decider == SIMULINK:
+			return self.decodeSimulinkState(data)
+		else:
+			return self.decodeMatlabState(data)
+        
+	def decodeMatlabState(self, data):
+		# Unpack from hex (binary array) to double
+		try:
+			data = str(data)
+			data = data.split(",")
+			del data[0]
+			del data[6]
+			data = [float(i) for i in data]
+		except: 
+			data = self.last_data
+        
+		return data
 
-	def decodeState(self, data):
+	def decodeSimulinkState(self, data):
 		# Unpack from hex (binary array) to double
 		try:
 			data = array.array('d',data)

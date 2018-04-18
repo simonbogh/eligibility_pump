@@ -212,3 +212,18 @@ class DQN_LSTM():
             print("Loading is complete !")
         else:
             print("no brain found...")
+            exit(1)
+            
+    def save_experience(self, path, name):
+        with open(path + '/' + name, 'wb') as fp:
+            pickle.dump(self.buffer, fp)
+            
+    def load_experience(self, path, name):
+        if os.path.isfile(os.path.join(path, str(name))):
+            print("=> loading experience... ")
+            with open (path + '/' + name, 'rb') as fp:
+                self.buffer = pickle.load(fp)
+            print("Loading is complete !")
+        else:
+            print("no experience found...")
+            exit(1)

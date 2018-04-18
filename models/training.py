@@ -1,6 +1,7 @@
 # Importing the libraries
 import matplotlib.pyplot as plt
 import os
+import time
 from matplotlib.backends.backend_pdf import PdfPages
 
 # Creating the
